@@ -1,2 +1,72 @@
-i have one million pounds in my bank acount alone
-LIAR!
+==== in Terminal:
+
+django-admin startproject mysite sitebag
+and then
+py manage.py startapp bags
+
+==== in Views.py:
+
+from django.http import HttpResponse
+
+def index(request):
+    return HttpResponse("Hello, world. You're at the polls index.")
+
+==== make urls.py and in urls.py:
+
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("", views.index, name="index"),
+]
+
+==== put the bags folder into the sitebag folder i did not do this 
+
+==== in terminal 
+py manage.py migrate
+
+==== in models.py
+
+from django.db import models
+
+
+class Bags(models.Model):
+    inbag=models.CharField(max_length=200)
+
+class Borrowingtime(models.Model):
+    start=models.DateTimeField("date borrowed")
+    end=models.DateTimeField("date returned")
+    member= models.CharField(max_length=200)
+    borrow= bool("Is it borrowed right now")
+
+
+class Employees(models.Model):
+    borrowed = models.ForeignKey(Borrowingtime, on_delete=models.CASCADE)
+
+==== go to settings.py 
+
+INSTALLED_APPS = [
+    "bags.apps.BagsConfig",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+]
+
+==== in terminal
+
+py sitebag/manage.py makemigrations
+
+py sitebag/manage.py sqlmigrate bags 0001 
+
+py sitebag/manage.py migrate
+
+
+==== in models.py
+it names the things so you can identify change the employee_name bit
+
+    def __str__(self):
+        return self.employee_name
