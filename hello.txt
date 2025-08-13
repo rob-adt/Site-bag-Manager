@@ -1,2 +1,22 @@
-i have one million pounds in my bank acount alone
-LIAR!
+in Terminal:
+
+django-admin startproject mysite sitebag
+and then
+py manage.py startapp bags
+
+in Views.py:
+
+from django.http import HttpResponse
+
+def index(request):
+    return HttpResponse("Hello, world. You're at the polls index.")
+
+make urls.py and in urls.py:
+
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("", views.index, name="index"),
+]
