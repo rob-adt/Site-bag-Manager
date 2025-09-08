@@ -6,6 +6,6 @@ from django.contrib import admin
 
 from .models import *
 
-admin.site.register(Bags)
-admin.site.register(Employees)
+admin.site.register(Bag)
+admin.site.register(Employee)
 admin.site.register(Borrowingtime)

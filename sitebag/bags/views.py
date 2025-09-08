@@ -4,4 +4,4 @@ from django.http import HttpResponse
 # Create your views here.
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the bags index.")
+    return render(request, "sitebag/detail.html")
