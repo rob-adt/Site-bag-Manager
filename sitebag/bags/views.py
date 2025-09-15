@@ -17,6 +17,9 @@ def index(request):
             bag.being_used = False
         else:
             bag.being_used = bag.last_borrowingtime.end is None
+
+    context["authenticated"] = request.user.is_authenticated
+    username=request.user.username
    
     return render(request, "sitebag/detail.html", context=context)
     

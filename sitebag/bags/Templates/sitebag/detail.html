@@ -28,7 +28,19 @@ td, th {
 <title >Bag Manager</title>
 <body style="background-color: #444444;"></body>
 <h2>
-<text style="font-size:xx-large;  font-family: arial, sans-serif;">Available Bags</text>
+<text style="font-size:xx-large;  font-family: arial, sans-serif;">Available Bags for {{form.username.label_tag}}</text>
+<form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}
+  {%csrf_token %}
+
+  <button type="submit">
+   {% if authenticated %}
+      Log out
+      
+    {% else %}
+      Log in
+    {% endif %}</button>
+</form>
+
 </h2>
 
 
@@ -59,15 +71,26 @@ td, th {
     <td>{{bag.last_borrowingtime.start}}</td>
     <td>{{bag.last_borrowingtime.end}}</td>
     <td>
+
+ 
+
+
+    {% if authenticated %}
+    AUTHENTICATED
   <button onclick="alert('{% if bag.being_used %}in{% else %}Log{% endif %}')">
     {% if bag.being_used %}
       Return
+      
     {% else %}
       Borrow
     {% endif %}
   </button>
 
-</button></td>
+</button>
+   {%else%}
+    Not authenticated
+{% endif %}
+</td>
     </wite>
   </tr>
   {% endfor %}
