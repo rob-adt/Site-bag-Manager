@@ -2,14 +2,74 @@
   h2 {
     border-radius: 5%;
     border: 2px solid rgb(255, 255, 255);
-    outline: 5px dotted rgb(255, 255, 255);
+    text-align: center;
+    color: white;
   }
+</style>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #444444;
+  text-align: left;
+  padding: 8px;
+  color: white;
+}
 </style>
 
 
 {% load static %}
-<link rel="shortcut icon" href="Documents\GitHub\Site-bag-Manager\favicon.ico" type="image/x-icon">
 
-<title>Bag Manager</title>
+<link rel="shortcut icon" href="Documents\GitHub\Site-bag-Manager\favicon.ico" type="image/x-icon">
+<title >Bag Manager</title>
 <body style="background-color: #444444;"></body>
-<text style="color: white;font-size:xx-large;">Available Bags</text>
+<h2>
+<text style="font-size:xx-large;  font-family: arial, sans-serif;">Available Bags</text>
+</h2>
+
+
+<table>
+  <tr>
+    <wite style="color: white;">
+    <th>Bag name</th>
+    <th>Available</th>
+    <th>user using it</th>
+    <th>date borrowed</th>
+    <th>date returned</th>
+    </wite>
+  </tr>
+  {% for bag in bags %}
+  
+  <tr>
+    <wite style="color: white;">
+    <td>{{bag}}</td>
+    <td>
+  {% if bag.being_used %}
+    False
+  {% else %}
+    True
+  {% endif %}
+</td>
+
+    <td>{{bag.last_borrowingtime.member}}</td>
+    <td>{{bag.last_borrowingtime.start}}</td>
+    <td>{{bag.last_borrowingtime.end}}</td>
+    <td>
+  <button onclick="alert('{% if bag.being_used %}in{% else %}Log{% endif %}')">
+    {% if bag.being_used %}
+      Return
+    {% else %}
+      Borrow
+    {% endif %}
+  </button>
+
+</button></td>
+    </wite>
+  </tr>
+  {% endfor %}
+</table>
+

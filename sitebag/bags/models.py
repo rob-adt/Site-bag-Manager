@@ -16,6 +16,6 @@ class Borrowingtime(models.Model):
     start=models.DateTimeField("date borrowed")
     end=models.DateTimeField("date returned",null=" ",blank=" ")
     member = models.ForeignKey(Employee, on_delete=models.CASCADE,null=True)
-    bag = models.ForeignKey(Bag, on_delete=models.CASCADE)
+    bag = models.ForeignKey(Bag, on_delete=models.CASCADE, related_name="borrowingtimes")
     def __str__(self):
         return f"{self.member} on {self.start.strftime("%d/%m/%y")}-{self.bag}"
