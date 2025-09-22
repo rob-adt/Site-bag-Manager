@@ -50,5 +50,11 @@ def my_view(request):
 
 
 def borrowbagview(request, pk):
-    print(get_object_or_404(Bag, pk=pk))
+    bag = get_object_or_404(Bag, pk=pk)
+    print(bag)
+    username=request.user.username
+    borrowing_time = Borrowingtime.objects.get(bag=bag)
+    bagg=borrowing_time.start
+    print(username)
+    print(bagg)
     return redirect("index")
