@@ -7,39 +7,42 @@
   }
 </style>
 <style>
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
 
-td, th {
-  border: 1px solid #444444;
-  text-align: left;
-  padding: 8px;
-  color: white;
-}
+  td,
+  th {
+    border: 1px solid #444444;
+    text-align: left;
+    padding: 8px;
+    color: white;
+  }
 </style>
 
 
 {% load static %}
+<img src="{% static 'Documents\GitHub\Site-bag-Manager\static\my_app\favicop.ico'%}" alt="My image">
 
-<link rel="shortcut icon" href="Documents\GitHub\Site-bag-Manager\favicon.ico" type="image/x-icon">
-<title >Bag Manager</title>
+
+<title>Bag Manager</title>
+
 <body style="background-color: #444444;"></body>
 <h2>
-<text style="font-size:xx-large;  font-family: arial, sans-serif;">Available Bags for {{form.username.label_tag}}</text>
-<form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}
-  {%csrf_token %}
+  <text style="font-size:xx-large;  font-family: arial, sans-serif;">Available Bags for {{username}}</text>
+  <form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}
+    {%csrf_token %}
 
-  <button type="submit">
-   {% if authenticated %}
+    <button type="submit">
+      {% if authenticated %}
       Log out
-      
-    {% else %}
+
+      {% else %}
       Log in
-    {% endif %}</button>
-</form>
+      {% endif %}</button>
+  </form>
 
 </h2>
 
@@ -47,52 +50,53 @@ td, th {
 <table>
   <tr>
     <wite style="color: white;">
-    <th>Bag name</th>
-    <th>Available</th>
-    <th>user using it</th>
-    <th>date borrowed</th>
-    <th>date returned</th>
+      <th>Bag name</th>
+      <th>Available</th>
+      <th>user using it</th>
+      <th>date borrowed</th>
+      <th>date returned</th>
     </wite>
   </tr>
   {% for bag in bags %}
-  
+
   <tr>
     <wite style="color: white;">
-    <td>{{bag}}</td>
-    <td>
-  {% if bag.being_used %}
-    False
-  {% else %}
-    True
-  {% endif %}
-</td>
+      <td>{{bag}}</td>
+      <td>
+        {% if bag.being_used %}
+        False
+        {% else %}
+        True
+        {% endif %}
+      </td>
 
-    <td>{{bag.last_borrowingtime.member}}</td>
-    <td>{{bag.last_borrowingtime.start}}</td>
-    <td>{{bag.last_borrowingtime.end}}</td>
-    <td>
-
- 
+      <td>{{bag.last_borrowingtime.member}}</td>
+      <td>{{bag.last_borrowingtime.start}}</td>
+      <td>{{bag.last_borrowingtime.end}}</td>
+      <td>
 
 
-    {% if authenticated %}
-    AUTHENTICATED
-  <button onclick="alert('{% if bag.being_used %}in{% else %}Log{% endif %}')">
-    {% if bag.being_used %}
-      Return
-      
-    {% else %}
-      Borrow
-    {% endif %}
-  </button>
+        {% if bag.being_used and bag.last_borrowingtime and username == bag.last_borrowingtime.member.user.username %}
+          {% if authenticated %}
+            
+            <button onclick=" alert('Returned')">
+              Return
+              
+            </button>
+           {%endif%}
 
-</button>
-   {%else%}
-    Not authenticated
-{% endif %}
-</td>
+        {%elif bag.being_used == False and authenticated%}
+          
+          <button onclick=" alert('Borrowed')">
+              Borrow
+              
+            </button>
+        {%else%}
+            Not Authenticated
+
+        {% endif %}
+      </td>
     </wite>
   </tr>
   {% endfor %}
 </table>
-

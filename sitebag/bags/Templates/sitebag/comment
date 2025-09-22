@@ -1,0 +1,4 @@
+hello
+hiiglyty pihhlyty
+{%if username == bag.last_borrowingtime.member%}
+{%else%}not in my neighbourhood'
