@@ -1,23 +1,22 @@
 <style>
-    h2 {
-      border-radius: 5%;
-      border: 2px solid rgb(255, 255, 255);
-      text-align: center;
-      color: white;
-    }
-    table {
-      font-family: arial, sans-serif;
-      border-collapse: collapse;
-      width: 100%;
-    }
-    td,
-    th {
-      border: 1px solid #444444;
-      text-align: left;
-      padding: 8px;
-      color: white;
-    }
-  </style>
+  h2 {
+    border-radius: 5%;
+    border: 2px solid #fff;
+    text-align: center;
+    color: white;
+  }
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  td, th {
+    border: 1px solid #444;
+    text-align: left;
+    padding: 8px;
+    color: white;
+  }
+</style>
 
 {% load static %}
 <link rel="shortcut icon" href="C:\Users\robert.weeks\OneDrive - AGH Engineering Ltd\Documents\GitHub\Site-bag-Manager\favicop.ico" type="image/x-icon">
@@ -25,7 +24,7 @@
 
 <title>Bag Manager</title>
 
-<body style="background-color: #444444;"></body>
+<body style="background-color: #444444;">
 <h2>
   <text style="font-size:xx-large;  font-family: arial, sans-serif;">Available Bags for {{username}}</text>
   <form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}
@@ -44,56 +43,42 @@
 
 
 <table>
-  <tr>
-  <th style="color: white;">
+  <thead>
+    <tr>
       <th>Bag name</th>
       <th>Available</th>
-      <th>user using it</th>
-      <th>date borrowed</th>
-      <th>date returned</th>
-  </th>
-  </tr>
-  {% for bag in bags %}
-
-  <tr>
-  <td style="color: white;">
-      <td>{{bag}}</td>
+      <th>User using it</th>
+      <th>Date borrowed</th>
+      <th>Date returned</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for bag in bags %}
+    <tr>
+      <td>{{ bag }}</td>
+      <td>{% if bag.being_used %}False{% else %}True{% endif %}</td>
+      <td>{{ bag.last_borrowingtime.member }}</td>
+      <td>{{ bag.last_borrowingtime.start }}</td>
+      <td>{% if bag.last_borrowingtime.end %}{{ bag.last_borrowingtime.end|date:"d/m/Y" }}{% endif %}</td>
       <td>
-        {% if bag.being_used %}
-        False
-        {% else %}
-        True
-        {% endif %}
-      </td>
-
-      <td>{{bag.last_borrowingtime.member}}</td>
-      <td>{{bag.last_borrowingtime.start}}</td>
-      <td>{{bag.last_borrowingtime.end}}</td>
-      <td>
-
-
         {% if bag.being_used and bag.last_borrowingtime and username == bag.last_borrowingtime.member.user.username %}
           {% if authenticated %}
-            
-            <button onclick=" alert('Returned')">
-              Return
-              
-            </button>
-           {%endif%}
-
-        {%elif bag.being_used == False and authenticated%}
-          
-          <button onclick="borrowBag('{% autoescape off %}{{ bag.id }}{% endautoescape %}')">Borrow</button>
-        {%else%}
-            Not Authenticated
-
+            <button onclick="returnBag('{{ bag.id }}')">Return</button>
+          {% endif %}
+        {% elif bag.being_used == False and authenticated %}
+          <button onclick="borrowBag('{{ bag.id }}')">Borrow</button>
+        {% else %}
+          Not Authenticated
         {% endif %}
-    </td>
-  </tr>
-  {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 
 <script>
+// Borrow a bag by sending a POST request to the backend
 function borrowBag(bagId) {
   fetch(`/borrow/${bagId}/`, {
     method: 'POST',
@@ -106,6 +91,23 @@ function borrowBag(bagId) {
   .then(data => {
     if (data.success) {
       alert('Bag borrowed by ' + data.member);
+      location.reload();
+    }
+  });
+}
+
+function returnBag(bagId) {
+  fetch(`/return/${bagId}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Bag returned by ' + data.member);
       location.reload();
     } else {
       alert('Error: ' + (data.error || 'Unknown error'));

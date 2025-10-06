@@ -1,3 +1,20 @@
+from django.utils import timezone
+from django.http import JsonResponse
+# Add view to return a bag and update Borrowingtime.end
+def return_bag(request, bag_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Not authenticated"}, status=403)
+    bag = get_object_or_404(Bag, pk=bag_id)
+    employee = Employee.objects.filter(user=request.user).first()
+    if not employee:
+        return JsonResponse({"error": "Employee not found"}, status=404)
+    borrowing_time = Borrowingtime.objects.filter(bag=bag, member=employee, end__isnull=True).order_by("-start").first()
+    if borrowing_time:
+        borrowing_time.end = timezone.now()
+        borrowing_time.save()
+        return JsonResponse({"success": True, "end": borrowing_time.end, "member": borrowing_time.member.user.username})
+    else:
+        return JsonResponse({"error": "No active borrowing found"}, status=404)
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
