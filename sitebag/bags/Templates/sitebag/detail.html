@@ -1,30 +1,26 @@
 <style>
-  h2 {
-    border-radius: 5%;
-    border: 2px solid rgb(255, 255, 255);
-    text-align: center;
-    color: white;
-  }
-</style>
-<style>
-  table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-  }
-
-  td,
-  th {
-    border: 1px solid #444444;
-    text-align: left;
-    padding: 8px;
-    color: white;
-  }
-</style>
-
+    h2 {
+      border-radius: 5%;
+      border: 2px solid rgb(255, 255, 255);
+      text-align: center;
+      color: white;
+    }
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    td,
+    th {
+      border: 1px solid #444444;
+      text-align: left;
+      padding: 8px;
+      color: white;
+    }
+  </style>
 
 {% load static %}
-<img src="{% static 'Documents\GitHub\Site-bag-Manager\static\my_app\favicop.ico'%}" alt="My image">
+<link rel="shortcut icon" href="C:\Users\robert.weeks\OneDrive - AGH Engineering Ltd\Documents\GitHub\Site-bag-Manager\favicop.ico" type="image/x-icon">
 
 
 <title>Bag Manager</title>
@@ -49,18 +45,18 @@
 
 <table>
   <tr>
-    <wite style="color: white;">
+  <th style="color: white;">
       <th>Bag name</th>
       <th>Available</th>
       <th>user using it</th>
       <th>date borrowed</th>
       <th>date returned</th>
-    </wite>
+  </th>
   </tr>
   {% for bag in bags %}
 
   <tr>
-    <wite style="color: white;">
+  <td style="color: white;">
       <td>{{bag}}</td>
       <td>
         {% if bag.being_used %}
@@ -87,16 +83,33 @@
 
         {%elif bag.being_used == False and authenticated%}
           
-          <button onclick=" alert('Borrowed')">
-              Borrow
-              
-            </button>
+          <button onclick="borrowBag('{% autoescape off %}{{ bag.id }}{% endautoescape %}')">Borrow</button>
         {%else%}
             Not Authenticated
 
         {% endif %}
-      </td>
-    </wite>
+    </td>
   </tr>
   {% endfor %}
 </table>
+
+<script>
+function borrowBag(bagId) {
+  fetch(`/borrow/${bagId}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Bag borrowed by ' + data.member);
+      location.reload();
+    } else {
+      alert('Error: ' + (data.error || 'Unknown error'));
+    }
+  });
+}
+</script>

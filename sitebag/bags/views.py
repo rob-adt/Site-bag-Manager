@@ -1,5 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.utils import timezone
+# Add view to borrow a bag and update Borrowingtime
+def borrow_bag(request, bag_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Not authenticated"}, status=403)
+    bag = get_object_or_404(Bag, pk=bag_id)
+    employee = Employee.objects.filter(user=request.user).first()
+    if not employee:
+        return JsonResponse({"error": "Employee not found"}, status=404)
+    borrowing_time = Borrowingtime.objects.filter(bag=bag).order_by("-start").first()
+    if borrowing_time is None or borrowing_time.end is not None:
+        borrowing_time = Borrowingtime.objects.create(
+            bag=bag,
+            member=employee,
+            start=timezone.now(),
+            end=None
+        )
+    else:
+        borrowing_time.start = timezone.now()
+        borrowing_time.member = employee
+        borrowing_time.save()
+    return JsonResponse({"success": True, "start": borrowing_time.start, "member": borrowing_time.member.user.username})
 from .models import Bag,Employee,Borrowingtime
 from django.db.models import Max
 
@@ -29,6 +51,8 @@ def index(request):
     context["buttoo"]=buttoo
 
 
+
+
     return render(request, "sitebag/detail.html", context=context)
     
 from django.contrib.auth import authenticate, login
@@ -49,12 +73,4 @@ def my_view(request):
     return render(request,"sitebag/detail.html",username=username)
 
 
-def borrowbagview(request, pk):
-    bag = get_object_or_404(Bag, pk=pk)
-    print(bag)
-    username=request.user.username
-    borrowing_time = Borrowingtime.objects.get(bag=bag)
-    bagg=borrowing_time.start
-    print(username)
-    print(bagg)
-    return redirect("index")
+
