@@ -1,28 +1,31 @@
-<style>
-  h2 {
+<style>h2 {
     border-radius: 5%;
     border: 2px solid #fff;
     text-align: center;
-    color: white;
-  }
+    color: white;}
   table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
-    width: 100%;
-  }
+    width: 100%;}
   td, th {
     border: 1px solid #444;
     text-align: left;
     padding: 8px;
-    color: white;
-  }
+    color: white;}
 </style>
+
+
+
 
 {% load static %}
 <link rel="shortcut icon" href="C:\Users\robert.weeks\OneDrive - AGH Engineering Ltd\Documents\GitHub\Site-bag-Manager\favicop.ico" type="image/x-icon">
 
 
+
 <title>Bag Manager</title>
+
+
+
 
 <body style="background-color: #444444;">
 <h2>
@@ -42,11 +45,14 @@
 </h2>
 
 
+
+
 <table>
   <thead>
     <tr>
       <th>Bag name</th>
       <th>Available</th>
+      <th> contents </th>
       <th>User using it</th>
       <th>Date borrowed</th>
       <th>Date returned</th>
@@ -58,6 +64,7 @@
     <tr>
       <td>{{ bag }}</td>
       <td>{% if bag.being_used %}False{% else %}True{% endif %}</td>
+      <td>{{contents}}</td>
       <td>{{ bag.last_borrowingtime.member }}</td>
       <td>{{ bag.last_borrowingtime.start }}</td>
       <td>{% if bag.last_borrowingtime.end %}{{ bag.last_borrowingtime.end|date:"d/m/Y" }}{% endif %}</td>
@@ -72,13 +79,35 @@
           Not Authenticated
         {% endif %}
       </td>
+      
+
+
+
     </tr>
-    {% endfor %}
+    {% endfor %}    
+<td><button onclick="addBag()">+ Add Bag</button></td>
   </tbody>
 </table>
 
+
+
+
 <script>
-// Borrow a bag by sending a POST request to the backend
+function addBag() {
+  const bagName = prompt("Enter bag name:");
+  if (bagName !== null && bagName.trim() !== "") {
+    alert(`Bag "${bagName}" added successfully!`);
+  } else {
+    alert("No bag name entered.");
+  }
+}
+</script>
+
+
+
+
+
+<script>
 function borrowBag(bagId) {
   fetch(`/borrow/${bagId}/`, {
     method: 'POST',
@@ -90,11 +119,13 @@ function borrowBag(bagId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert('Bag borrowed by ' + data.member);
+      // alert('Bag borrowed by ' + data.member);
       location.reload();
     }
   });
 }
+
+
 
 function returnBag(bagId) {
   fetch(`/return/${bagId}/`, {
@@ -107,11 +138,13 @@ function returnBag(bagId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert('Bag returned by ' + data.member);
+      // alert('Bag returned by ' + data.member);
       location.reload();
     } else {
       alert('Error: ' + (data.error || 'Unknown error'));
     }
-  });
+  }
+)
+;
 }
 </script>
