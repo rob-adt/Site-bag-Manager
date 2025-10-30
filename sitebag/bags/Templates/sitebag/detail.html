@@ -1,39 +1,36 @@
-<style>h2 {
-    border-radius: 5%;
-    border: 2px solid #fff;
-    text-align: center;
-    color: white;}
-  table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;}
+<style>
   td, th {
     border: 1px solid #444;
     text-align: left;
     padding: 8px;
-    color: white;}
+    color: white;
+  }
 </style>
 
-
+ 
 
 
 {% load static %}
-<link rel="shortcut icon" href="C:\Users\robert.weeks\OneDrive - AGH Engineering Ltd\Documents\GitHub\Site-bag-Manager\favicop.ico" type="image/x-icon">
+<head>
+  <link rel="shortcut icon" href="C:\Users\robert.weeks\OneDrive - AGH Engineering Ltd\Documents\GitHub\Site-bag-Manager\favicop.ico" type="image/x-icon">
+  <title>Bag Manager</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
 
 
 
-<title>Bag Manager</title>
+<body class="bg-dark">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
 
 
-
-<body style="background-color: #444444;">
-<h2>
-  <text style="font-size:xx-large;  font-family: arial, sans-serif;">Available Bags for {{username}}</text>
-  <form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}
+ <form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}  
+<nav class="navbar navbar-dark bg-body-tertiary" data-bs-theme="dark">
+  <div class="container-fluid">
+    <a class="navbar-brand fs-3">Available Bags for {{username}}</a>
+    <form class="d-flex" role="search">
     {%csrf_token %}
-
-    <button type="submit">
+    <button class="btn btn-outline-light fs-6 " type="submit">
       {% if authenticated %}
       Log out
 
@@ -41,21 +38,22 @@
       Log in
       {% endif %}</button>
   </form>
+    </form>
+  </div>
+</nav>
 
-</h2>
 
 
 
-
-<table>
+<table class="table table-dark table-striped" data-bs-theme="dark" >
   <thead>
     <tr>
       <th>Bag name</th>
-      <th>Available</th>
-      <th> contents </th>
+      <th>Contents</th>
       <th>User using it</th>
       <th>Date borrowed</th>
       <th>Date returned</th>
+      <th>Available</th>
       <th>Action</th>
     </tr>
   </thead>
@@ -63,20 +61,22 @@
     {% for bag in bags %}
     <tr>
       <td>{{ bag }}</td>
-      <td>{% if bag.being_used %}False{% else %}True{% endif %}</td>
-      <td>{{contents}}</td>
+      <td class="overflow-scroll">{{ bag.last_borrowingtime.contents }}</td>
       <td>{{ bag.last_borrowingtime.member }}</td>
-      <td>{{ bag.last_borrowingtime.start }}</td>
+      <td>{{ bag.last_borrowingtime.start|date:"d/m/Y" }}</td>
       <td>{% if bag.last_borrowingtime.end %}{{ bag.last_borrowingtime.end|date:"d/m/Y" }}{% endif %}</td>
+      <td>{% if bag.being_used %}<text class="text-danger">False</text>{% else %}<text class="text-success">True</text>{% endif %}</td>
       <td>
         {% if bag.being_used and bag.last_borrowingtime and username == bag.last_borrowingtime.member.user.username %}
           {% if authenticated %}
-            <button onclick="returnBag('{{ bag.id }}')">Return</button>
+            <button class="btn btn-outline-success" onclick="returnBag('{{ bag.id }}')">Return</button>
           {% endif %}
         {% elif bag.being_used == False and authenticated %}
-          <button onclick="borrowBag('{{ bag.id }}')">Borrow</button>
+          <button class="btn btn-outline-success" onclick="borrowBag('{{ bag.id }}')">Borrow</button>
         {% else %}
-          Not Authenticated
+        <button class="btn btn-outline-danger">
+        Not Authenticated
+        </button>
         {% endif %}
       </td>
       
@@ -85,10 +85,10 @@
 
     </tr>
     {% endfor %}    
-<td><button onclick="addBag()">+ Add Bag</button></td>
+
   </tbody>
 </table>
-
+<button class="btn btn-outline-light" onclick="addBag()">+ Add Bag</button>
 
 
 
@@ -96,7 +96,22 @@
 function addBag() {
   const bagName = prompt("Enter bag name:");
   if (bagName !== null && bagName.trim() !== "") {
-    alert(`Bag "${bagName}" added successfully!`);
+    fetch('/add-bag/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ bagName: bagName })
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message || data.error);
+      location.reload()
+    })
+    .catch(error => {
+      alert("An error occurred.");
+      console.error(error);
+    });
   } else {
     alert("No bag name entered.");
   }
@@ -119,7 +134,6 @@ function borrowBag(bagId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      // alert('Bag borrowed by ' + data.member);
       location.reload();
     }
   });
@@ -138,7 +152,6 @@ function returnBag(bagId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      // alert('Bag returned by ' + data.member);
       location.reload();
     } else {
       alert('Error: ' + (data.error || 'Unknown error'));
@@ -148,3 +161,4 @@ function returnBag(bagId) {
 ;
 }
 </script>
+

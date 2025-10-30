@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from .models import Bag, Employee, Borrowingtime
 import json
+from django.views.decorators.csrf import csrf_exempt
+
 def return_bag(request, bag_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Not authenticated"}, status=403)
@@ -57,21 +59,20 @@ def borrow_bag(request, bag_id):
     if not employee:
         return JsonResponse({"error": "Employee not found"}, status=404)
 
-    borrowing_time = Borrowingtime.objects.filter(bag=bag).order_by("-start").first()
+    # Check if the bag is currently being used
+    active_borrowing = Borrowingtime.objects.filter(bag=bag, end__isnull=True).first()
 
-    if borrowing_time is None or borrowing_time.end is not None:
-        borrowing_time = Borrowingtime.objects.create(
-            bag=bag,
-            member=employee,
-            contents=contents,
-            start=timezone.now(),
-            end=None
-        )
-    else:
-        borrowing_time.start = timezone.now()
-        borrowing_time.member = employee
-        borrowing_time.contents = contents
-        borrowing_time.save()
+    if active_borrowing:
+        return JsonResponse({"error": "Bag is currently in use"}, status=400)
+
+
+    borrowing_time = Borrowingtime.objects.create(
+        bag=bag,
+        member=employee,
+        contents=contents,
+        start=timezone.now(),
+        end=None
+    )
 
     return JsonResponse({
         "success": True,
@@ -80,13 +81,16 @@ def borrow_bag(request, bag_id):
     })
 
 
+
 def index(request):
     bags = Bag.objects.all()
-
+    
     for bag in bags:
         bag.last_borrowingtime = bag.borrowingtimes.order_by("-start").first()
         bag.end_borrowingtime = bag.borrowingtimes.order_by("-end").first()
-        bag.being_used = bag.last_borrowingtime and bag.last_borrowingtime.end is None
+        bag.being_used = (
+            bag.last_borrowingtime is not None and bag.last_borrowingtime.end is None
+        )
     context = {
         "bags": bags,
         "authenticated": request.user.is_authenticated,
@@ -95,6 +99,7 @@ def index(request):
     }
 
     return render(request, "sitebag/detail.html", context=context)
+
 
 
 def addbg(request):
@@ -114,3 +119,18 @@ def my_view(request):
         login(request, user)
 
     return render(request, "sitebag/detail.html", {"username": username})
+
+
+
+
+
+@csrf_exempt
+def add_bag(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        bag_name = data.get('bagName')
+        if bag_name:
+            new_bag = Bag(inbag=bag_name)
+            new_bag.save()
+            return JsonResponse({'message': f'Bag "{bag_name}" added successfully!'})
+        return JsonResponse({'error': 'No bag name provided.'}, status=400)
