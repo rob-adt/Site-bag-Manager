@@ -3,12 +3,12 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from .models import Bag, Employee, Borrowingtime
+from bags.models import Bag,Borrowingtime,Employee
 import json
 from django.views.decorators.csrf import csrf_exempt
 
 def return_bag(request, bag_id):
-    if not request.user.is_authenticated:
+    if not request.user.is_authenicated:
         return JsonResponse({"error": "Not authenticated"}, status=403)
 
     bag = get_object_or_404(Bag, pk=bag_id)
@@ -42,7 +42,50 @@ def return_bag(request, bag_id):
     else:
         return JsonResponse({"error": "No active borrowing found"}, status=404)
 
+def add_content(request, cont):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Not authenticated"}, status=403)
+    
+    
+# Create new URL in urls.py for updating contents of a bag, and point it to the following view:
+# Create view in views.py for updating the contents of a bag
+#   bag = get_object_or_404(Bag, pk=bag_id)
+#   bag.contents = "THis is my sample contents"
+#   bag.save()
+# Have your javascrpt function send a post / get request to the URL
 
+def contentsave(request, bag_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Not authenticated"}, status=403)
+    
+    bag = get_object_or_404(Bag, pk=bag_id)
+    employee = Employee.objects.filter(user=request.user).first()
+
+    bag.contents = request.body.decode()
+    bag.save()
+    return JsonResponse({
+        "success": True,
+        "contents_text": bag.contents
+    })
+
+def deletebag(request, bag_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Not authenticated"}, status=403)
+    
+    bag = get_object_or_404(Bag, pk=bag_id)
+    employee = Employee.objects.filter(user=request.user).first()
+
+    bag.delete()
+    
+    return JsonResponse({
+        "success": True,
+        "contents_text": bag.contents
+    })
+
+    
+
+
+    
 def borrow_bag(request, bag_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Not authenticated"}, status=403)
@@ -69,7 +112,6 @@ def borrow_bag(request, bag_id):
     borrowing_time = Borrowingtime.objects.create(
         bag=bag,
         member=employee,
-        contents=contents,
         start=timezone.now(),
         end=None
     )
@@ -79,6 +121,7 @@ def borrow_bag(request, bag_id):
         "start": borrowing_time.start,
         "member": borrowing_time.member.user.username
     })
+
 
 
 
