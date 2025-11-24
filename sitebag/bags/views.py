@@ -8,7 +8,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 
 def return_bag(request, bag_id):
-    if not request.user.is_authenicated:
+    if not request.user.is_authenticated:
         return JsonResponse({"error": "Not authenticated"}, status=403)
 
     bag = get_object_or_404(Bag, pk=bag_id)
