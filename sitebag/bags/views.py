@@ -124,23 +124,28 @@ def borrow_bag(request, bag_id):
 
 
 
+
 def index(request):
     bags = Bag.objects.all()
-    
+    tags = Tags.objects.all()
+
     for bag in bags:
         bag.last_borrowingtime = bag.borrowingtimes.order_by("-start").first()
         bag.end_borrowingtime = bag.borrowingtimes.order_by("-end").first()
         bag.being_used = (
             bag.last_borrowingtime is not None and bag.last_borrowingtime.end is None
         )
+
     context = {
         "bags": bags,
+        "tags": tags,
         "authenticated": request.user.is_authenticated,
         "username": request.user.username,
         "buttoo": not bag.being_used if bags else True
     }
 
     return render(request, "sitebag/detail.html", context=context)
+
 
 
 

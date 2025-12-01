@@ -34,9 +34,11 @@
 </head>
 
 <body>
+
+
   <nav class="navbar navbar-dark bg-dark px-3">
     <div class="container-fluid">
-      <a class="navbar-brand fs-4">👜 Bag Manager — {{ username }}</a>
+      <a class="navbar-brand fs-4">👜 Bag Manager — {{ username }}</a> {% if user.is_superuser %} <a class="related-widget-wrapper-link add-related" data-popup="yes" href="http://127.0.0.1:8000/admin/" title="Go to admin site"><img src="https://st.depositphotos.com/1002881/1285/i/450/depositphotos_12859789-stock-photo-admin-tag.jpg" alt="" width="100" height="50"></a> {%endif%}
 
 
       <form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}
@@ -53,7 +55,9 @@
     <p style="cursor: pointer;" class="alert alert-success"  role="alert" onclick="hideSaved()" id="output" hidden></p>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2>Available Bags</h2>
+      {% if authenticated %}
       <button class="btn btn-outline-success" onclick="addBag()">+ Add Bag</button>
+      {% endif %}
     </div>
 
 
@@ -99,7 +103,7 @@
                 {%endif%}
               
                 {% if authenticated and not bag.being_used or bag.being_used and bag.last_borrowingtime and username == bag.last_borrowingtime.member.user.username %}
-                  <button class="btn btn-sm btn-outline-primary" onclick="getText('{{ bag.id }}')">Save</button>
+                  <button class="btn btn-sm btn-outline-primary" onclick="getText('{{ bag.id }}'),setTimeout(hideSaved, 5000);">Save</button>
                 {% else %}
                   <button class="btn btn-sm btn-outline-secondary" disabled>Not Authenticated</button>
                 {% endif %}
@@ -110,14 +114,35 @@
               </div>
             </td>
 
-            <td>{{ bag.last_borrowingtime.member }}</td>
+            <td>
+              {% if authenticated %}
+              {{ bag.last_borrowingtime.member }}
+              {% else %}
+              {% if bag.being_used %}
+              #########
+              {% endif %}
+              {% endif %}
+            </td>
             <td>{{ bag.last_borrowingtime.start|date:"d/m/Y" }}</td>
             <td>{% if bag.last_borrowingtime.end %}{{ bag.last_borrowingtime.end|date:"d/m/Y" }}{% else %}—{% endif %}</td>
 
-            <td>
-              {{ borrowingtime.tagg }}
-            </td>
+            <td>              
+              
+              <select onclick="addBag" class="btn btn-outline-light dropdown-toggle" name="TagSelect" id="tag-select-{{ bag.id }}">
+                <option value=" "></option>
+                {% for tag in tags %}
+                <option value="{{ tag.id }}" {% if bag.tagg and bag.tagg.id == tag.id %}selected{% endif %}>
+                {{ tag.tag }}
+                </option>
+               {% endfor %}
+              </select>
 
+              {% if user.is_superuser %}
+              <a class="related-widget-wrapper-link add-related" id="add_id_tagg" data-popup="yes" href="http://127.0.0.1:8000/admin/bags/tags/add/" title="Add another tags"><img src="/static/admin/img/icon-addlink.svg" alt="" width="24" height="24"></a>
+              {% endif %}
+
+            </td>
+            
             <td>
               {% if bag.being_used %}
                 <span class="badge bg-danger">Unavailable</span>
@@ -225,6 +250,7 @@
     document.getElementById("output").textContent = "Saved as: " + textValue;
     document.getElementById("output").hidden = false;
       fetch(`/contentsave/${bagId}/`, {method: 'POST',headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json'},body: textValue})}
+    
   
   </script>
 </body>

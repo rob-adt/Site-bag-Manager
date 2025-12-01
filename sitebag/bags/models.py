@@ -8,7 +8,7 @@ class Tags(models.Model):
 
 class Bag(models.Model):
     inbag=models.CharField(max_length=200)
-    contents=models.TextField(null=True,blank=True) 
+    contents=models.TextField(null=True,blank=True, default=" ") 
     tagg=models.ForeignKey(Tags, on_delete=models.CASCADE, related_name="Bag",null=True,blank=True)
     def __str__(self):
         return self.inbag
