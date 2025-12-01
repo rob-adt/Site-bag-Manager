@@ -181,3 +181,14 @@ def add_bag(request):
             new_bag.save()
             return JsonResponse({'message': f'Bag "{bag_name}" added successfully!'})
         return JsonResponse({'error': 'No bag name provided.'}, status=400)
+    
+def changetag(request, bag_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        tag_id = data.get('tagId')
+        bag = get_object_or_404(Bag, pk=bag_id)
+        tag = get_object_or_404(Tags, pk=tag_id)
+        bag.tagg = tag
+        bag.save()
+        return JsonResponse({'message': f'Tag for Bag "{bag.inbag}" changed successfully!'})
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)

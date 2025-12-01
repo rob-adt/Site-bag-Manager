@@ -10,5 +10,6 @@ urlpatterns = [
     path('addcontent/', views.add_content, name='addcontent'),
     path('contentsave/<int:bag_id>/',views.contentsave, name="contentsave"),
     path('deletebag/<int:bag_id>/',views.deletebag, name="deletebag"),
+    path('changetag/<int:bag_id>/',views.changetag, name="changetag"),
 ]
 

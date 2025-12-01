@@ -128,12 +128,10 @@
 
             <td>              
               
-              <select onclick="addBag" class="btn btn-outline-light dropdown-toggle" name="TagSelect" id="tag-select-{{ bag.id }}">
+              <select class="btn btn-outline-light dropdown-toggle" name="TagSelect" id="tag-select-{{ bag.id }}" onchange="changeTag('{{ bag.id }}')">
                 <option value=" "></option>
                 {% for tag in tags %}
-                <option value="{{ tag.id }}" {% if bag.tagg and bag.tagg.id == tag.id %}selected{% endif %}>
-                {{ tag.tag }}
-                </option>
+                <option onclick="changeTag" value="{{ tag.id }}" {% if bag.tagg and bag.tagg.id == tag.id %}selected{% endif %}>{{ tag.tag }}</option>
                {% endfor %}
               </select>
 
@@ -251,6 +249,23 @@
     document.getElementById("output").hidden = false;
       fetch(`/contentsave/${bagId}/`, {method: 'POST',headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json'},body: textValue})}
     
+
+  function changeTag(bagId) {
+    const selectElement = document.getElementById(`tag-select-${bagId}`);
+    const selectedTagId = selectElement.value;
+
+    fetch(`/changetag/${bagId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tagId: selectedTagId })
+    })
+    .then(response => response.json())
+    .then(data => {
+    });
+  }
   
   </script>
 </body>
