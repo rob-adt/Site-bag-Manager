@@ -9,3 +9,4 @@ from .models import *
 admin.site.register(Bag)
 admin.site.register(Employee)
 admin.site.register(Borrowingtime)
+admin.site.register(Tags)

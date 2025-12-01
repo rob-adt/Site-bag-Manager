@@ -3,7 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from bags.models import Bag,Borrowingtime,Employee
+from bags.models import Bag,Borrowingtime,Employee,Tags
 import json
 from django.views.decorators.csrf import csrf_exempt
 
@@ -13,7 +13,6 @@ def return_bag(request, bag_id):
 
     bag = get_object_or_404(Bag, pk=bag_id)
     employee = Employee.objects.filter(user=request.user).first()
-
     try:
         data = json.loads(request.body)
         contents = data.get("contents")

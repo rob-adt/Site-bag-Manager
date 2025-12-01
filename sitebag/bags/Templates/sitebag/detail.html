@@ -38,6 +38,7 @@
     <div class="container-fluid">
       <a class="navbar-brand fs-4">👜 Bag Manager — {{ username }}</a>
 
+
       <form method="post" {% if authenticated %}action="/accounts/logout/">{% else %}action="/accounts/login/">{% endif %}
         {% csrf_token %}
         <button class="btn btn-outline-light" type="submit">
@@ -47,14 +48,15 @@
     </div>
   </nav>
 
-  <!-- Changed container to container-fluid -->
+
   <div class="container-fluid mt-4 px-4">
+    <p style="cursor: pointer;" class="alert alert-success"  role="alert" onclick="hideSaved()" id="output" hidden></p>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2>Available Bags</h2>
       <button class="btn btn-outline-success" onclick="addBag()">+ Add Bag</button>
     </div>
 
-    <!-- Table now full width -->
+
     <div class="table-responsive w-100">
       <table class="table table-dark table-striped align-middle w-100">
         <thead>
@@ -64,6 +66,7 @@
             <th>User Using It</th>
             <th>Date Borrowed</th>
             <th>Date Returned</th>
+            <th>Tag</th>
             <th>Available</th>
             <th>Action</th>
           </tr>
@@ -85,10 +88,10 @@
 
 {% if bag.being_used and bag.last_borrowingtime and username == bag.last_borrowingtime.member.user.username %}
                 {% if authenticated %}
-                  <input class="card card-body p-2 max-width=40px" id="myInput" contenteditable="true" type="text" value="{{ bag.contents }}">
+                  <input class="card card-body p-2 max-width=40px" id="myInput-{{bag.id}}" contenteditable="true" type="text" value="{{ bag.contents }}">
                 {% endif %}
               {% elif not bag.being_used and authenticated %}
-                <input class="card card-body p-2" id="myInput" contenteditable="true"  type="text" value="{{ bag.contents }}">
+                <input class="card card-body p-2" id="myInput-{{bag.id}}" contenteditable="true"  type="text" value="{{ bag.contents }}">
               {% else %}
                 <input class="card card-body p-2" contenteditable="false"  type="text" value="{{ bag.contents }}">
               {% endif %}
@@ -101,7 +104,7 @@
                   <button class="btn btn-sm btn-outline-secondary" disabled>Not Authenticated</button>
                 {% endif %}
 
-                <p id="output"></p>
+                
 
 
               </div>
@@ -110,6 +113,10 @@
             <td>{{ bag.last_borrowingtime.member }}</td>
             <td>{{ bag.last_borrowingtime.start|date:"d/m/Y" }}</td>
             <td>{% if bag.last_borrowingtime.end %}{{ bag.last_borrowingtime.end|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+
+            <td>
+              {{ borrowingtime.tagg }}
+            </td>
 
             <td>
               {% if bag.being_used %}
@@ -209,16 +216,15 @@
   }
 
 
+  function hideSaved() {document.getElementById("output").hidden = true;}
+
+
   function getText(bagId) {
-    const inputElement = document.getElementById("myInput");
+    const inputElement = document.getElementById(`myInput-${bagId}`);
     const textValue = inputElement.value;
-    document.getElementById("output").textContent = "You entered: " + textValue;
-      fetch(`/contentsave/${bagId}/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json'},
-        body: textValue
-      })
-    }
+    document.getElementById("output").textContent = "Saved as: " + textValue;
+    document.getElementById("output").hidden = false;
+      fetch(`/contentsave/${bagId}/`, {method: 'POST',headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json'},body: textValue})}
   
   </script>
 </body>
